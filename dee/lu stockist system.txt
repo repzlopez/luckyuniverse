@@ -1,0 +1,27 @@
+STOCKIST MODULE
+
+company/consign 0%
+stockist	3%
+megastockist	5%
+001		7%
+
+DISTRIBUTOR
+     - add/edit
+     - delete (admin only), reason
+
+REPLENISH
+     - min 10k (to get stockist bonus)
+     - outright discount
+     - bonus within stockist group
+     - 60 days expiry
+          - considered sold if inactive after 60 days
+
+INVENTORY
+     - initial stock for head office
+          - STOCK IN, into company
+          - STOCK OUT, pullout/loss/demo
+     - transfer to/from stockist
+
+SALES
+     - as400-like data-entry, list products/stocks at side
+     - negative stocks, notify to call head office

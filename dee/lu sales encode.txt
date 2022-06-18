@@ -1,0 +1,36 @@
+distributor username or if customer, distributor username or discount code
+
+date (default today)
+
+item code
+
+(show) item description
+
+quantity
+
+price (dp pag distributor, srp pag customer ni distributor username, 
+website srp if distributor discount code)
+
+total (qty * price)
+
+Subtotal: sum(total)
+
+Discount: 0 or (subtotal * 10% if distributor discount code applied)
+
+VATable sales: (total due) / 1.12 {round up 5/round down 4}
+
+VAT: Total due less vatable sales
+
+TOTAL due: Subtotal less discount
+
+===========================================
+
+cash payment
+bank deposit
+bank transfer
+gcash
+then another option is to use their bonuses as part of payment
+
+===========================================
+
+yung printing ng “receipt” is 1/4 size

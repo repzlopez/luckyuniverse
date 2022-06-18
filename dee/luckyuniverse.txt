@@ -1,0 +1,19 @@
+Members Dashboard
+-bonuses
+-balance
+-request for release
+-genealogy
+
+membership type:
+STARTER
+DREAMER
+FAST TRACK
+PRODUCT availed
+
+unilevel
+20 10 5 3 2 1
+
+001		7%
+stockist	3%
+megastockist	5%
+
