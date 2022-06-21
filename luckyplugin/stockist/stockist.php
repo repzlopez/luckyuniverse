@@ -45,7 +45,7 @@ $fl = $r['fl'];
 // $os = countEm(DBOPS, 'transactions' . date('Y'), "encoded_by='".STOCKIST_ID."' AND status=0");
 $ds = countEm(DBPRF, 'distributors', "dsencodedby='".STOCKIST_ID."' AND dsstatus=1");
 $ts = countEm(DBSTK, 'transfers', "(transfer_from='".STOCKIST_ID."' OR transfer_to='".STOCKIST_ID."') AND receive_by IS NULL AND conso_by IS NULL");
-$ro = countEm(DBSTK, 'reorders', "warehouse='".STOCKIST_ID."' AND status=0");
+$ro = countEm(DBSTK, 'reorders', "(warehouse='".STOCKIST_ID."' OR reorder_from='".STOCKIST_ID."') AND status=0");
 $st = countEm(DBSTK, 'stocks', "warehouse='".STOCKIST_ID."' AND qty>0", 'qty');
 
 $tt = $ts;

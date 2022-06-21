@@ -41,7 +41,7 @@ if( mysqli_num_rows($rs)>0 ) {
           }
      }
 
-     $x .= '<ul><li>';
+     $x .= '<ul class="listing"><li>';
           $x .= '<strong class="'.$col1.'">Product Name</strong> ';
           $x .= '<strong class="w2 rt">Qty</strong> ';
           $x .= '<strong class="w2 rt bad">Float</strong> ';

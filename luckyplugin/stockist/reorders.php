@@ -10,13 +10,13 @@ $fee = get_page_by_title( 'Fees', '', 'page' );
 if( isset($_POST) && !empty($_POST) ) {
      defined('INCLUDE_CHECK') || define('INCLUDE_CHECK',1);
      require_once plugin_dir_path( __DIR__ ) . 'templates/setup.php';
-
+// print_r($_POST);
      foreach ($_POST as $k=>$v) $$k = str_replace(',', '', $v);
 
-     if( ISIN_ADMIN ) {
+     if( ISIN_ADMIN || STOCKIST_ID == $reorder_from ) {
           if( !$status ) {
                $con = SQLi(DBSTK);
-               $qry = "UPDATE reorders SET approved='". date(TMDSET) ."',status=1 WHERE id=$uri";
+               $qry = "UPDATE reorders SET approved='". date(TMDSET) ."',approved_by='". ( ISIN_ADMIN ? ADMIN_ID : STOCKIST_ID ) ."',status=1 WHERE id=$uri";
                $rs  = mysqli_query($con,$qry);
 
                echo '<h5>Reorder '. sprintf("%'.0".PAD."d\n", $uri) .' approved</h5>';
@@ -30,7 +30,7 @@ if( isset($_POST) && !empty($_POST) ) {
 
      } else {
           $con = SQLi(DBSTK);
-          $qry = "INSERT INTO reorders (id,pay_amount,s_fee,s_pct,warehouse,submitted,status) VALUES ('',$pay_amount,$s_fee,$s_pct,'". STOCKIST_ID ."','". date(TMDSET) ."',$status)";
+          $qry = "INSERT INTO reorders (id,pay_amount,s_fee,s_pct,warehouse,reorder_from,submitted,status) VALUES ('',$pay_amount,$s_fee,$s_pct,'". STOCKIST_ID ."','$reorder_from','". date(TMDSET) ."',$status)";
 
           mysqli_query($con,$qry) or die(mysqli_error($con));
           $last_id = mysqli_insert_id( $con );
@@ -50,6 +50,7 @@ if( isset($_POST) && !empty($_POST) ) {
           $url = get_permalink( $ret->ID );
           echo '<h5>Reorder '. sprintf("%'.0".PAD."d\n", $last_id) .' submitted</h5>';
      }
+// echo $qry;
 
      mysqli_close($con);
      unset($_POST);
@@ -69,7 +70,7 @@ if( $exists ) {
      $trn = 'transfers' . SEL_YEAR;
      $tbl = 'reorders';
 
-     $qry = "SELECT t.*,r.*,p.name,s.upline,s.level
+     $qry = "SELECT t.*,r.*,p.name,s.upline,s.level,s.warehouse stockist_name
           FROM reorders r
           LEFT JOIN ".DB.DBOPS.".$trn t ON t.reorder_id=r.id
           LEFT JOIN ".DB.DBPRF.".products p ON p.id=t.item
@@ -134,7 +135,7 @@ if( !empty($_SESSION['cart']) ) {
 
 $submitted = ( $submitted!='' ? $submitted : date(TMDSET) );
 $submit    = !$exists ? '<input type="submit" class="w2 btn" value="Submit" /> ' :'';
-$aprub     = ISIN_ADMIN ? '<input type="submit" class="btn" value="'.( $status ? 'Transfer' : 'Approve' ).'" /> ' :''; //&& !$status
+$aprub     = ( ISIN_ADMIN || STOCKIST_ID == $reorder_from )? '<input type="submit" class="btn" value="'.( $status ? 'Transfer' : 'Approve' ).'" /> ' :''; //&& !$status
 $gotrans   = '<input type="button" href="'.get_permalink( $mtr->ID ).'?'.$transfer_id.'" class="btn link" value="Go to Transfers" /> ';
 $back      = !$_SESSION['fees_on'] ? '<input type="button" href="'.get_permalink( $ret->ID ).'" class="btn link" value="Back" /> ' :'';
 $baktofees = $_SESSION['fees_on'] ? '<input type="button" href="'.get_permalink( $fee->ID ).'" class="btn link" value="Back to Fees" /> ' :'';
@@ -145,6 +146,10 @@ $co .= '<input type="hidden" name="id" value="'.($uri!=''?sprintf("%'.0".PAD."d\
 $co .= ISIN_ADMIN ? '<input type="hidden" name="warehouse" value="'.$warehouse.'" />' :'';
 $co .= ISIN_ADMIN ? '<input type="hidden" name="upline" value="'.$upline.'" />' :'';
 $co .= ISIN_ADMIN ? '<input type="hidden" name="level" value="'.$level.'" />' :'';
+
+
+$co .= '<li><label>Reorder From:</label> '.( $exists ? '<span class="w4 rt">'. $stockist_name . '</span><input type="hidden" name="reorder_from" value="'.$reorder_from.'" />' : '<select name="reorder_from" class="w4">' . load_stockist_list($reorder_from, '', 'from') . '</select>');
+$co .= '</li>';
 
 $co .= '<li><label>Order Date:</label> <input type="text" class="'.($exists ? '' : 'datepicker').' w4" value="'.date( DATFUL, strtotime($submitted) ).'" '.($exists ? READONLY : 'datepicker').' /><input type="hidden" name="submitted" value="'.$submitted.'" />';
 $co .= '    <label>Total Amount:</label> <input type="text" name="pay_amount" class="w4 rt" placeholder="0.00" value="'. number_format($pay_amount,2) .'" '.READONLY.' required />';

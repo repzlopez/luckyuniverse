@@ -23,3 +23,9 @@ dhubcares@gmail.com
 luckynotif@luckyuniverseph.com
 
 ADD printed checkbox to PROFILE
+
+=====================================
+
+REORDER
+- test available stocks
+- notify user

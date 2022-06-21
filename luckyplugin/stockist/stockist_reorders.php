@@ -13,7 +13,7 @@ $sel .= '</select><hr></div>';
 echo $sel;
 
 if( ISIN_STOCKIST ) {
-     $add = "AND warehouse='".STOCKIST_ID."'";
+     $add = "AND (r.warehouse='".STOCKIST_ID."' OR r.reorder_from='".STOCKIST_ID."')";
 }
 
 $con  = SQLi(DBSTK);
@@ -22,12 +22,13 @@ $test = 0;
 $oldstat = -1;
 
 if( init_table($con,$tbl) ) {
-     $qry = "SELECT * FROM $tbl
+     $qry = "SELECT r.*,s.warehouse stockist_name FROM $tbl r
+          LEFT JOIN ".DB.DBPRF.".stockist s ON s.id=r.warehouse
           WHERE YEAR(submitted)=". SEL_YEAR ."
           $add
           ORDER BY status,id";
 
-     $rs  = mysqli_query($con,$qry) or die(mysqli_error($con));
+          $rs  = mysqli_query($con,$qry) or die(mysqli_error($con));
      $test = 1;
 }
 

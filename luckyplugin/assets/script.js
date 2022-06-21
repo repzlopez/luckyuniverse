@@ -399,11 +399,13 @@ jQuery(document).ready(function(){
 			var next = jQuery('#stockist_orders input[type=submit]').next().next();
 
 			if ( dis.length==1 && dis.val()=='' ) {
+console.log(8);
 				next.addClass('bad').text( 'No item selected.' );
 				jQuery('input[type=submit]').prop('disabled', false);
 				e.preventDefault();
 
 			} else if( isNaN( jQuery('#stockist_orders input[name=referrer]').val() ) ) {
+console.log(9);
 				next.addClass('bad').text( 'Invalid Distributor ID.' );
 				jQuery('input[type=submit]').prop('disabled', false);
 				e.preventDefault();
@@ -419,12 +421,15 @@ jQuery(document).ready(function(){
 
 			if ( dis.length==1 && dis.val()=='' ) {
 				next.addClass('bad').text( 'No item selected.' );
-				jQuery('input[type=submit]').prop('disabled', false);
-				e.preventDefault();
 
 			} else {
-				jQuery('.reorders form').submit();
+				if( confirm('Submit reorder?')) {
+					jQuery('.reorders form').submit();
+				}
 			}
+
+			jQuery('input[type=submit]').prop('disabled', false);
+			e.preventDefault();
 		});
 
 	} // #stockist_orders
@@ -783,8 +788,9 @@ jQuery(document).ready(function(){
      });
 
 	jQuery(document).on('submit','form',function(e){
-		jQuery('form').submit();
-		e.preventDefault();
+console.log(3);
+		// jQuery('form').submit();
+		// e.preventDefault();
     });
 
 });

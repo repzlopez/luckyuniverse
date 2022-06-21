@@ -119,9 +119,12 @@ function createTable($k){
                $qry="CREATE TABLE IF NOT EXISTS $tbl (
                     id        INT(8)         unsigned zerofill NOT NULL auto_increment,
                     item      INT(5)         NOT NULL,
+                    reorder_qty  INT(11)     NOT NULL,
                     transfer_qty INT(11)     NOT NULL,
                     receive_qty  INT(11)     NOT NULL,
+                    consolidate  INT(11)     NOT NULL,
                     transfer_id  INT(8)      unsigned zerofill NULL default NULL,
+                    reorder_id   INT(8)      unsigned zerofill NULL default NULL,
                               PRIMARY KEY (id) )";
                break;
 
