@@ -8,7 +8,7 @@ if( !empty($_POST) ) {
      $con = SQLi(DBOPS);
      $rs  = mysqli_query($con,$qry);
 
-     if( mysqli_num_rows($rs)>0 ){
+     if( mysqli_num_rows($rs)>0 ) {
           $ret = get_page_by_title( 'Orders', '', 'page' );
           reloadTo( get_permalink($ret->ID) .'?'. $trans_id );
           unset($_POST);

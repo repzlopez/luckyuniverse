@@ -125,7 +125,7 @@ $x .= '</ul></form>';
 
 echo $x . BACKTOTOP;
 
-function scan_stocks($id){
+function scan_stocks($id) {
      $con = SQLi(DBSTK);
      $qry = "SELECT qty FROM stocks WHERE id = $id";
      $rs  = mysqli_query($con,$qry) or die(mysqli_error($con));

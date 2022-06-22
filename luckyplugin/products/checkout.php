@@ -23,7 +23,7 @@ if( isset($order_id) || ( isset($_SESSION['cart']) && !empty($_SESSION['cart']) 
      if( isset($order_id) ) {
           $_SESSION['print']['id'] = $order_id;
           $trans_id = $order_id;
-          $lock     = READONLY;
+          $lock     = READ_ONLY;
 
           $tbl = 'transactions' . SEL_YEAR;
           $qry = "SELECT *,
@@ -31,9 +31,9 @@ if( isset($order_id) || ( isset($_SESSION['cart']) && !empty($_SESSION['cart']) 
                FROM $tbl WHERE trans_id='$trans_id'";
           $con = SQLi(DBOPS);
           $rs  = mysqli_query($con,$qry);
-          if( mysqli_num_rows($rs)>0 ){
+          if( mysqli_num_rows($rs)>0 ) {
           	$rw = mysqli_fetch_assoc( $rs );
-          	foreach( $rw as $k=>$v ){ $$k=stripslashes($v); }
+          	foreach( $rw as $k=>$v ) { $$k=stripslashes($v); }
           } else {
                $valid_id = 0;
                echo '<h5>Oops! Invalid Order ID!</h5>';
@@ -58,7 +58,7 @@ if( isset($order_id) || ( isset($_SESSION['cart']) && !empty($_SESSION['cart']) 
           $con = SQLi(DBPRF);
           $rs  = mysqli_query($con,$qry);
      	$r   = mysqli_fetch_assoc( $rs );
-     	foreach( $r as $k=>$v ){ $$k=stripslashes($v); }
+     	foreach( $r as $k=>$v ) { $$k=stripslashes($v); }
      }
 
      $update_only = ( $pay_fee!='' && is_numeric($pay_fee) ? 0:1 );
@@ -121,7 +121,7 @@ if( isset($order_id) || ( isset($_SESSION['cart']) && !empty($_SESSION['cart']) 
           }
 
           $sel_payout='<select name="pay_out" class="w3" '.( $pay_out<2 && $pay_out==99 ? '': ( $payimg!='' ? $lock :'' ) ).' '.( $status ? DISABLED :'' ).'>';
-          foreach( $pay as $k=>$v ){
+          foreach( $pay as $k=>$v ) {
                if( $v!='' ) $sel_payout.='<option value='.$k.' '.($k==$pay_out?SELECTED:'').' data-QR="'.$arrQR[$k].'">'.$v.'</option>';
           }
           if( ISIN_ADMIN || ISIN_DISTRI && !$withheld ) $sel_payout.='<option value=99 '.(99==$pay_out?SELECTED:'').' '.($mybonus<$pay_amount?'class="disabled" title="Unavailable. You only have P'.number_format($mybonus,2).' balance." ' . DISABLED:' title="You have P'.number_format($mybonus,2).' balance."').' >Use Bonus</option>';
@@ -132,7 +132,7 @@ if( isset($order_id) || ( isset($_SESSION['cart']) && !empty($_SESSION['cart']) 
 
           $co .= '<div class="cart"><h3>PAYMENT DETAILS</h3><ul>';
           $co .= '<li><label class="w2">Order Total:</label> <span class="w3 box order_total">'.number_format($total_checkout,2,'.','').'</span>';
-          $co .= '<span class="w1"></span><label class="w2">Delivery Fee:</label> <input type="text" name="pay_fee" class="w3 order_fee" placeholder="0.00" value="'.( $update_only ? 'TO FOLLOW' : number_format($pay_fee,2) ).'" '.( ISIN_ADMIN ? '' : READONLY ).' required />';
+          $co .= '<span class="w1"></span><label class="w2">Delivery Fee:</label> <input type="text" name="pay_fee" class="w3 order_fee" placeholder="0.00" value="'.( $update_only ? 'TO FOLLOW' : number_format($pay_fee,2) ).'" '.( ISIN_ADMIN ? '' : READ_ONLY ).' required />';
           if(ISIN_DISTRI) {
                $co .= '<br><span class="w2"></span> <span class="smaller">**Shipping fee may change depending on package and location</span>';
                $co .= '<br><span class="w2"></span> <span class="smaller">**In case of changes, you will be contacted for confirmation.</span></li>';
@@ -140,7 +140,7 @@ if( isset($order_id) || ( isset($_SESSION['cart']) && !empty($_SESSION['cart']) 
 
           $co .= '<li><label class="w2">Pay with:</label> '.$sel_payout;
           // if( $pay_fee!='' ) {
-               $co .= '<span class="w1"></span><label class="w2">Amount Due:</label> <input type="number" name="pay_amount" class="w3" placeholder="0.00" value="'.number_format($total_checkout+$pay_fee,2,'.','').'" '.READONLY.' required />';
+               $co .= '<span class="w1"></span><label class="w2">Amount Due:</label> <input type="number" name="pay_amount" class="w3" placeholder="0.00" value="'.number_format($total_checkout+$pay_fee,2,'.','').'" '.READ_ONLY.' required />';
           // } else $co .= '<span class="w1"></span><strong>Delivery Fee TO FOLLOW</strong>';
           $co .= '</li>';
 

@@ -151,8 +151,8 @@ $co .= ISIN_ADMIN ? '<input type="hidden" name="level" value="'.$level.'" />' :'
 $co .= '<li><label>Reorder From:</label> '.( $exists ? '<span class="w4 rt">'. $stockist_name . '</span><input type="hidden" name="reorder_from" value="'.$reorder_from.'" />' : '<select name="reorder_from" class="w4">' . load_stockist_list($reorder_from, '', 'from') . '</select>');
 $co .= '</li>';
 
-$co .= '<li><label>Order Date:</label> <input type="text" class="'.($exists ? '' : 'datepicker').' w4" value="'.date( DATFUL, strtotime($submitted) ).'" '.($exists ? READONLY : 'datepicker').' /><input type="hidden" name="submitted" value="'.$submitted.'" />';
-$co .= '    <label>Total Amount:</label> <input type="text" name="pay_amount" class="w4 rt" placeholder="0.00" value="'. number_format($pay_amount,2) .'" '.READONLY.' required />';
+$co .= '<li><label>Order Date:</label> <input type="text" class="'.($exists ? '' : 'datepicker').' w4" value="'.date( DATFUL, strtotime($submitted) ).'" '.($exists ? READ_ONLY : 'datepicker').' /><input type="hidden" name="submitted" value="'.$submitted.'" />';
+$co .= '    <label>Total Amount:</label> <input type="text" name="pay_amount" class="w4 rt" placeholder="0.00" value="'. number_format($pay_amount,2) .'" '.READ_ONLY.' required />';
 $co .= '</li>';
 
 if( !$exists ) {
@@ -161,11 +161,11 @@ if( !$exists ) {
 $reorder_due = $pay_amount - $s_fee;
 
 $co .= '<li><span class="w4">Min to get fee: </span> <label class="w2 min_fee" data-minfee="'.$s_sfee.'">P '. number_format($s_sfee,2) .'</label>';
-$co .= '    <label class="rt">Fee ( '. ( ISIN_ADMIN ? $s_pct : $stockist_fee[STOCKIST_LVL] ) .'% ):</label> <input type="text" name="s_fee" class="w4 rt" value="'.number_format($s_fee,2).'" '.READONLY.' /> <input type="hidden" name="s_pct" value="'.( ISIN_ADMIN ? $s_pct : $stockist_fee[STOCKIST_LVL] ).'" />';
+$co .= '    <label class="rt">Fee ( '. ( ISIN_ADMIN ? $s_pct : $stockist_fee[STOCKIST_LVL] ) .'% ):</label> <input type="text" name="s_fee" class="w4 rt" value="'.number_format($s_fee,2).'" '.READ_ONLY.' /> <input type="hidden" name="s_pct" value="'.( ISIN_ADMIN ? $s_pct : $stockist_fee[STOCKIST_LVL] ).'" />';
 $co .= '</li>';
 
 $co .= '<li><label class="w4">Status:</label> <span class="w4">'.strtoupper($arrReorders[$status]).'</span> <input type="hidden" value='.$status.' name="status" />';
-$co .= '    <label>Amount Due:</label> <input type="text" class="w4 rt" id="reorder_due" value="'. number_format($reorder_due,2) .'" '.READONLY.' />';
+$co .= '    <label>Amount Due:</label> <input type="text" class="w4 rt" id="reorder_due" value="'. number_format($reorder_due,2) .'" '.READ_ONLY.' />';
 $co .= '</li>';
 
 $co .= '</ul><hr><div>'. ( $exists ? ( $transfer_id!='' ? $gotrans :$aprub ) : $submit ). $back . $baktofees .'<span class="smaller"></span></div>';

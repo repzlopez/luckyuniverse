@@ -47,7 +47,7 @@ if( isset($_POST['save']) && $_POST['save'] ) {
 }
 
 $sel_payout = '<select name="pay_out">';
-foreach( $pay as $k=>$v ){
+foreach( $pay as $k=>$v ) {
      $sel_payout.='<option value='.$k.' '.($k==$pay_out?SELECTED:'').'>'.$v.'</option>';
 } $sel_payout .= '</select>';
 

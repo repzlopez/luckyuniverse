@@ -84,7 +84,7 @@ define( 'FLUSHOUT', 60 );
 
 define( 'IMG_EXISTS', $_SERVER['DOCUMENT_ROOT'].'/img/folder/' );
 define( 'DIV_CLEAR', '<div class="clear"></div>' );
-define( 'READONLY', 'readonly="readonly"' );
+define( 'READ_ONLY', 'readonly="readonly"' );
 define( 'DISABLED', 'disabled="disabled"' );
 define( 'SELECTED', 'selected="selected"' );
 define( 'CHECKED', 'checked="checked"' );
@@ -96,44 +96,44 @@ define( 'CONTACT_US', '<p><a href="mailto:'.SUPPORT_MAIL.'"><span class="dashico
 function SQLi($dbsrc) {
      require_once('info.config');
      $con = mysqli_connect( HOST, DB.USN, PSW, DB.$dbsrc );
-     if( !$con ){
+     if( !$con ) {
           die('Connection failed: '.mysqli_connect_error());
           exit;
      } else return $con;
 }
 
-function active_order($status){
+function active_order($status) {
      // 0 - pending
      // 4 - cancel
      return ( $status > 0 && $status < 4 );
 }
 
-function init_status(){
+function init_status() {
      $arr = array();
      $con = SQLi(DBPRF);
      $rs	= mysqli_query( $con, "SELECT id,status FROM admin WHERE id>990 ORDER BY id DESC" ) or die( mysqli_error($con) );
-     while( $r=mysqli_fetch_array($rs) ){
+     while( $r=mysqli_fetch_array($rs) ) {
           $arr[] = $r['status'];
      }
      return $arr;
 }
 
-function init_settings(){
+function init_settings() {
      $arr = array();
      $con = SQLi(DBPRF);
      $rs	= mysqli_query( $con, "SELECT * FROM settings ORDER BY id" ) or die( mysqli_error($con) );
-     while( $r=mysqli_fetch_array($rs) ){
+     while( $r=mysqli_fetch_array($rs) ) {
           $arr[] = $r['dataset'];
      }
      return $arr;
 }
 
-function init_table($con,$tbl){
+function init_table($con,$tbl) {
      $r = mysqli_query( $con, "SHOW TABLES LIKE '$tbl'" ) or die(mysqli_error($con));
      return ( mysqli_num_rows($r) > 0 );
 }
 
-function init_menus($has_sub,$title,$url,$class=''){
+function init_menus($has_sub,$title,$url,$class='') {
      switch ($has_sub) {
           case 0:
                $x = '<li class="menu-item menu-item-type-post_type menu-item-object-page '.$class.'"><a href="'.$url.'">'.$title.'</a></li>';
@@ -148,7 +148,7 @@ function init_menus($has_sub,$title,$url,$class=''){
      return $x;
 }
 
-function load_item_list($list,$freebies=0){
+function load_item_list($list,$freebies=0) {
      $ttl = $freebies ? 'Freebies' : 'Available';
 
      if( !TESTNET_ON && $freebies ) {}
@@ -161,7 +161,7 @@ function load_item_list($list,$freebies=0){
           }
 }
 
-function load_package_list($sel=''){
+function load_package_list($sel='') {
      global $post;
 
      $con = SQLi(DBPRF);
@@ -180,7 +180,7 @@ function load_package_list($sel=''){
      return $ret;
 }
 
-function load_stockist_list($sel='',$add='',$options='', $lock=0){
+function load_stockist_list($sel='',$add='',$options='', $lock=0) {
      global $post;
      $inc_test_warehouse = TESTNET_ON ? '1=1': "id>0 $add";
      $return_one = $lock ? "AND id=$sel" :'';
@@ -225,7 +225,7 @@ function load_stockist_list($sel='',$add='',$options='', $lock=0){
      return $ret;
 }
 
-function countEm($dbsrc,$tbl,$wer='',$sum='*',$groupby=''){
+function countEm($dbsrc,$tbl,$wer='',$sum='*',$groupby='') {
      require plugin_dir_path( __DIR__ ) . 'templates/infoconfig.php';
 
      $do  = $sum !='*' ? 'SUM' : 'COUNT';
@@ -239,10 +239,10 @@ function countEm($dbsrc,$tbl,$wer='',$sum='*',$groupby=''){
      $rs	= mysqli_query($con, $qry) or die(mysqli_error($con));
      $r   = mysqli_fetch_array($rs);
      return $r['n'];
-     mysqli_close();
+     mysqli_close($con);
 }
 
-function countDays($dat){
+function countDays($dat) {
      $rdate = $flushout = $ret = '';
 
      if( $dat != 'na') {
@@ -260,7 +260,7 @@ function countDays($dat){
      return array($rdate, date(mdY, $flushout), $ret);
 }
 
-function init_logs($act,$tbl,$affected,$editor){
+function init_logs($act,$tbl,$affected,$editor) {
      // id,act,tbl,affect,who,stamp
      if( !TESTNET_ON ) {
           $arrAct = array('Add','Edit','Delete');
@@ -271,19 +271,19 @@ function init_logs($act,$tbl,$affected,$editor){
      }
 }
 
-function test_transfers($con,$id){
+function test_transfers($con,$id) {
      $rs = mysqli_query( $con, "CALL test_transfers($id)" ) or die(mysqli_error($con));
      $r  = mysqli_fetch_array($rs);
      return $r['ret'];
 }
 
-function allow_submit($last){
+function allow_submit($last) {
      $d1 = strtotime($last);
      $d2 = strtotime('now');
      return abs($d1-$d2) > SUBMIT_INTERVAL;
 }
 
-function reloadTo($url,$delay=0){
+function reloadTo($url,$delay=0) {
 	echo '<META HTTP-EQUIV=Refresh CONTENT="'.$delay.';URL='.$url.'">';exit;
 }
 ?>

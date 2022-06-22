@@ -9,7 +9,7 @@ if( isset($_POST) ) {
      unset($_POST['action']);
 
      $cn = SQLi(DBPRF);
-     foreach( $_POST as $k=>$v ){
+     foreach( $_POST as $k=>$v ) {
           $v = trim_escape($cn,$v);
           $qry = "INSERT INTO settings VALUES ('$k','$v') ON DUPLICATE KEY UPDATE dataset='$v'";
 

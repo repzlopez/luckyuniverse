@@ -20,7 +20,7 @@ foreach($arr as $k) {
      }
 }
 
-function createTable($k){
+function createTable($k) {
      $tbl = $k . date('Y');
 
      switch( $k ) {

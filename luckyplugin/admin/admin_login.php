@@ -13,13 +13,13 @@ if( !empty( $_POST ) ) {
      $qry  = "SELECT * FROM admin WHERE un='$un' AND status=1";
      $test = mysqli_query($con,$qry) or die(mysqli_error($con));
 
-     if( mysqli_num_rows($test) == 0 ){               //test if acct exists
+     if( mysqli_num_rows($test) == 0 ) {               //test if acct exists
           $_SESSION['return_msg']['msg'] = 'Invalid username or password';
      } else {
           $r = mysqli_fetch_array($test);
           $pwsql = stripslashes($r['pw']);
 
-          if( $pw == $pwsql ){                        //test pass
+          if( $pw == $pwsql ) {                        //test pass
                foreach ( $r as $k=>$v ) $$k=$v;
 
                $_SESSION['id']          = $r['id'];

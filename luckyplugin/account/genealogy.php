@@ -17,7 +17,7 @@ echo $dl . BACKTOTOP;
 function getDistList($dssid,$lvl,$max) {
      global $total_downlines,$dl;
 
-     if($lvl>=$max){}
+     if($lvl>=$max) {}
 	else{
           $total_downlines++;
 		$cn = SQLi(DBPRF);
@@ -27,7 +27,7 @@ function getDistList($dssid,$lvl,$max) {
 		if( mysqli_num_rows($rs) == 0 ) {
 			if( $lvl==0 ) $dl.='<ul><li class="">No data found</li></ul>';
 		} else {
-			if( $lvl == 0 ){
+			if( $lvl == 0 ) {
                     $dl .= '<ul id="genealogy" class="listing"><li><span class="w1"></span>';
                     $dl .= '<strong class="w2">ID #</strong> ';
                     $dl .= '<strong class="w5">Name</strong> ';

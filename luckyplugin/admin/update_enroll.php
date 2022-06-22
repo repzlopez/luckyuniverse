@@ -96,14 +96,14 @@ if( !empty( $_POST ) ) {
 
 }
 
-function run_enroll($dsdid,$item,$slots,$trans_id,$encoded_on){
+function run_enroll($dsdid,$item,$slots,$trans_id,$encoded_on) {
      $con = SQLi(DBOPS);
      $qry  = "INSERT INTO enroll VALUES ('',$dsdid,$item,$slots,$trans_id,'$encoded_on')";
 // echo "$qry<br>";
      mysqli_query( $con, $qry ) or die( mysqli_error($con) );
 }
 
-function update_referral($trans_id,$dsdid,$pov,$bonus){
+function update_referral($trans_id,$dsdid,$pov,$bonus) {
      $kdata  = 'id,trans_id,dsdid,pov,bonus,status';
 
      $idata  = "'',";

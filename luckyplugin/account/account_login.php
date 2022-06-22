@@ -24,7 +24,7 @@ if( !empty( $_POST ) ) {
 
      if( mysqli_num_rows($test) == 0 ) {                //test if acct exists
           $_SESSION['return_msg']['msg'] = 'Invalid username or password';
-     } elseif( !$r[$stat] ){                      //test if disabled
+     } elseif( !$r[$stat] ) {                      //test if disabled
           $_SESSION['return_msg']['msg'] = 'Account is DISABLED. Contact Admin.';
      } else {
 

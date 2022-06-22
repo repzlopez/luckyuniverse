@@ -23,7 +23,7 @@ class LuckyPluginStockist
      function init_stockist( ) {
           global $luckyuser;
 
-          if( $_SESSION['user_type']=='stockist' ){
+          if( $_SESSION['user_type']=='stockist' ) {
                $luckyuser['id']         = $_SESSION['id'];
                $luckyuser['un']         = $_SESSION['un'];
                $luckyuser['nn']         = $_SESSION['nn'];

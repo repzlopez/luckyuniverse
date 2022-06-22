@@ -84,8 +84,8 @@ if( $_SESSION['snc_referrer']!='' ) {
 
 $x .= '<form method="post" action="'.esc_url( admin_url('admin-post.php') ).'" enctype="multipart/form-data" class="form-data '.(ISIN_STOCKIST?'stockist':'').'" id="profile"><input type="hidden" name="action" value="update_profile" /><ul>';
 
-$x .= '<li '.( $dsdid=='' ? ' class="hide"' :'' ).'><label>Distributor ID: *</label><input type="text" name="dsdid" '.$styleuser.' value="'.$dsdid.'" '.(ISIN_ADMIN?'':READONLY).' placeholder="Distributor ID" maxlength=32  '.(ISIN_ADMIN?'':'required').' /><input type="hidden" name="oldid" value="'.$dsdid.'" /> '.$bad_user.'</li>';
-$x .= '<li '.( $_SESSION['snc_referrer']!='' ? ' class="hide"' :'' ).'><label>Referred By: * </label><input type="text" name="dssid" '.$stylessid.' value="'.$dssid.'" '.( ISIN_ADMIN || ( ISIN_STOCKIST && $oldid=='' ) ? '': READONLY ).' placeholder="Sponsor ID" maxlength=32 required /> <span class="smaller">'.$nam.'</span>'.$bad_ssid.' '.(ISIN_ADMIN?'<span class="dashicons dashicons-search" title="Search Sponsor"></span>':'').'</li>';
+$x .= '<li '.( $dsdid=='' ? ' class="hide"' :'' ).'><label>Distributor ID: *</label><input type="text" name="dsdid" '.$styleuser.' value="'.$dsdid.'" '.(ISIN_ADMIN?'':READ_ONLY).' placeholder="Distributor ID" maxlength=32  '.(ISIN_ADMIN?'':'required').' /><input type="hidden" name="oldid" value="'.$dsdid.'" /> '.$bad_user.'</li>';
+$x .= '<li '.( $_SESSION['snc_referrer']!='' ? ' class="hide"' :'' ).'><label>Referred By: * </label><input type="text" name="dssid" '.$stylessid.' value="'.$dssid.'" '.( ISIN_ADMIN || ( ISIN_STOCKIST && $oldid=='' ) ? '': READ_ONLY ).' placeholder="Sponsor ID" maxlength=32 required /> <span class="smaller">'.$nam.'</span>'.$bad_ssid.' '.(ISIN_ADMIN?'<span class="dashicons dashicons-search" title="Search Sponsor"></span>':'').'</li>';
 
 $x .= '<li '.( $_SESSION['snc_referrer']!='' ? ' class="hide"' :'' ).'><hr></li>';
 $x .= '<li><label>Username: *</label><input type="text" name="un" '.$styleun.' value="'.$un.'" minlength=4 maxlength=32 required /><input type="hidden" name="oldun" value="'.$un.'" /> '.$bad_un.'</li>';
@@ -176,7 +176,7 @@ if( ISIN_ADMIN ) {
      $x .= '<li><label>Member Type:</label>'.$sel_dsmtype.'</li>';
      $x .= '<li><label>Discount Code:</label><input type="text" name="discount" value="'.$discount.'" /> <span id="generate_discount" class="dashicons dashicons-tickets-alt" title="Generate Code"></span></li>';
      $x .= '<li><label>Encoded:</label><input type="text" class="datepicker" value="'.date( DATFUL, strtotime($enc) ).'" /><input type="hidden" name="dsencoded" value="'.$dsencoded.'" /></li>';
-     if( IS_GLOBAL ) $x.='<li><label>Encoded By:</label><input type="text" name="dsencodedby" value="'.($dsencodedby!=''?$dsencodedby:ADMIN_ID).'" '.READONLY.' /></li>';
+     if( IS_GLOBAL ) $x.='<li><label>Encoded By:</label><input type="text" name="dsencodedby" value="'.($dsencodedby!=''?$dsencodedby:ADMIN_ID).'" '.READ_ONLY.' /></li>';
 
      $x .= '<li><hr></li>';
      $x .= '<li><label>Withhold Bonus:</label><label class="smaller"><input type="hidden" name="withheld" value=0 /><input type="checkbox" name="withheld" value=1 '.($withheld?CHECKED:'').' /> Check to withhold bonus</label></li>';

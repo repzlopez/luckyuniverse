@@ -45,7 +45,7 @@ class LuckyPlugin
      }
 
 //initialize
-     function init_sessions(){
+     function init_sessions() {
           global $luckyuser, $msg_ret, $msgclass, $msg_count;
           if ( !isset($_SESSION) ) session_start();
 

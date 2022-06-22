@@ -153,20 +153,20 @@ $submit = $status < VOID ? '<input type="submit" class="w2 btn" value="Submit" /
 $back = '<input type="button" href="'.get_permalink( $ret->ID ).'" class="btn link" value="Back" /> ';
 
 $co .= '<li><hr><h3>SOLD TO</h3><ul class="cart">';
-$co .= '<li><label>Distributor:</label> <input type="text" name="referrer" class="w5" value="'.$referrer.'" '.($status > 0 && $status < VOID ? READONLY :'').' required /> <span class="smaller"></span></li>';
+$co .= '<li><label>Distributor:</label> <input type="text" name="referrer" class="w5" value="'.$referrer.'" '.($status > 0 && $status < VOID ? READ_ONLY :'').' required /> <span class="smaller"></span></li>';
 
 $co .= '<li><label>Order Total:</label> <span class="w3 box pay_amt">'.number_format($pay_amount,2).'</span><span class="w1"></span><input type="hidden" name="pay_amount" class="pay_amt" value="'. $pay_amount .'" />';
      $co .= '<label class="rt">Total POV:</label> <input type="text" name="pov" class="w3" value="'.number_format($pov,2,'.','').'" />';
 $co .= '</li>';
 
 $sel_payout = '<select name="pay_out" class="w3">';
-foreach( $pay as $k=>$v ){
+foreach( $pay as $k=>$v ) {
      if( $v!='' ) $sel_payout.='<option value='.$k.' '.($k==$pay_out?SELECTED:'').'>'.$v.'</option>';
 }
 $sel_payout.='</select>';
 
 $co .= '<li><label class="w2 rt">Pay with:</label> '. $sel_payout .' <span class="w1"></span>';
-     $co .= '<label class="rt">Date Sold:</label> <input type="text" class="'.($exists ? '' : 'datepicker').' w3" value="'.date( DATFUL, strtotime($submitted) ).'" '.($exists ? READONLY : 'datepicker').' /><input type="hidden" name="submitted" value="'.$submitted.'" />';
+     $co .= '<label class="rt">Date Sold:</label> <input type="text" class="'.($exists ? '' : 'datepicker').' w3" value="'.date( DATFUL, strtotime($submitted) ).'" '.($exists ? READ_ONLY : 'datepicker').' /><input type="hidden" name="submitted" value="'.$submitted.'" />';
 $co .= '</li>';
 
 $pd  = substr($pay_date,-4).'-'.substr($pay_date,0,2).'-'.substr($pay_date,2,2);

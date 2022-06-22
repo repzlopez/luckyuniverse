@@ -21,7 +21,7 @@ class LuckyPluginAdmin
      function init_admin( ) {
           global $luckyuser, $resetstatus;
 
-          if( $_SESSION['user_type']=='admin' ){
+          if( $_SESSION['user_type']=='admin' ) {
                $luckyuser['id']         = $_SESSION['id'];
                $luckyuser['un']         = $_SESSION['un'];
                $luckyuser['nn']         = $_SESSION['nn'];

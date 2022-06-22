@@ -1,7 +1,7 @@
 <?php if( !ISIN_STOCKIST ) exit;
 
 unset($_SESSION['cart']);
-foreach($luckyuser as $k=>$v){ $$k=$v;}
+foreach($luckyuser as $k=>$v) { $$k=$v;}
 
 $x  .= '';
 $tns = 'transactions' . SEL_YEAR;
