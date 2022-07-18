@@ -156,6 +156,8 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Spartan'; }
 #item_list h5.on { background:#eee;color:#000;padding:10px 0 0 15px!important; }
 #item_list ul { padding:10px; }
 
+#stock_transfer { width: 900px; }
+
 #backtotop { cursor:pointer;padding:10px;position:fixed;left:0;bottom:76px;transition:opacity 0.2s ease-out;z-index:999; }
 #backtotop:hover { opacity:1; }
 #backtotop a { background:url("img/up.png") no-repeat center;display:block;height:48px;width:48px;outline:none;padding:5px; }
@@ -193,7 +195,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Spartan'; }
 /*	placeholder		*/
 
 /*	classes		*/
-.btn { background-color:#fff !important;border:#ddd solid 1px !important;color:#75c32c!important;display:inline-block;font-weight:bold;height:44px !important;outline:none !important;padding:8px 10px !important; }
+.btn { background-color:#fff !important;border:#ddd solid 1px !important;color:#75c32c!important;display:inline-block;font-weight:bold;height:44px !important;line-height:30px !important;outline:none !important;padding:8px 10px !important; }
 .btn:hover { background-color:#75c32c !important;color:#fff !important; }
 .col1-ws { width:300px !important;display:inline-block;white-space:nowrap; }
 .edit_on { background-color:#f1f4f9;padding:10px !important; }
@@ -202,7 +204,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Spartan'; }
 .badrow * { color:red !important; }
 .hide { display:none; }
 .lock { background-color:#ccc !important; }
-.void span { color:darkred !important;text-decoration:line-through !important; }
+.void * { color:darkred !important;text-decoration:line-through !important; }
 .disabled { color:#ccc; }
 .smaller { color:#999;font-size:smaller;font-style:italic; }
 .lt { text-align:left; }

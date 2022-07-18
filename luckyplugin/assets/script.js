@@ -418,12 +418,18 @@ console.log(9);
 		jQuery('.reorders input[type=submit]').click(function(e) {
 			var dis = jQuery('#order_list .item_code');
 			var next = jQuery('#stockist_orders input[type=submit]').next().next();
+			var from = jQuery('.reorder_from').val();
 
 			if ( dis.length==1 && dis.val()=='' ) {
 				next.addClass('bad').text( 'No item selected.' );
 
+			} else if (from == null ) {
+				alert('Unable to continue. No warehouse selected.');
+
 			} else {
-				if( confirm('Submit reorder?')) {
+				var dos = jQuery(this).val();
+
+				if (confirm( dos  + ' reorder?')) {
 					jQuery('.reorders form').submit();
 				}
 			}
@@ -654,8 +660,9 @@ console.log(9);
 
 			}
 
+			jQuery('input[type=submit]').prop('disabled', false);
+
 			if ( bad ) {
-				jQuery('input[type=submit]').prop('disabled', false);
 				e.preventDefault();
 			}
 
@@ -788,7 +795,7 @@ console.log(9);
      });
 
 	jQuery(document).on('submit','form',function(e) {
-console.log(3);
+console.log(jQuery('form').serialize());
 		// jQuery('form').submit();
 		// e.preventDefault();
     });

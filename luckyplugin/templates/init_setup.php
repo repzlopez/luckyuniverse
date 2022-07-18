@@ -19,7 +19,7 @@ $protocol   = strpos( strtolower($_SERVER['SERVER_PROTOCOL']), 'https') === fals
 $arrCB	  = array( 'No', 'Yes' );
 $arrSex	  = array( 'Choose Gender', 'Male', 'Female', 'I choose not to answer' );
 $arrOrders  = array( 'Pending', 'Processing', 'For Delivery', 'Delivered', 'Cancelled' );
-$arrReorders= array( 'Pending', 'Approved', 'Transferred' );
+$arrReorders= array( 'Pending', 'Approved', 'Transferred', 'Void' );
 $arrTransfer= array( 'Pending', 'Transferred' );
 $arrPurpose = array( 'Withdraw', 'Purchase', 'Auto-Payout' );
 $arrPayout  = array( 'Automatic', 'Manual' );
@@ -209,7 +209,7 @@ function load_stockist_list($sel='',$add='',$options='', $lock=0) {
           }
      }
 
-     $ret  = !$lock ? '<option value="" '. ( $sel=='' ? SELECTED :'' ) .'>Select Warehouse</option>' :'';
+     $ret  = !$lock ? '<option value="" disabled '. ( $sel=='' ? SELECTED :'' ) .'>Select Warehouse</option>' :'';
      $ret .= ( ISIN_ADMIN && !preg_match( "/manage orders|manage packages/i", $post->post_title ) ) ? $add_option :'';
 
      if( mysqli_num_rows($rs)>0 ) {

@@ -58,7 +58,7 @@ if( mysqli_num_rows($rs)>0 && $test ) {
 
           $x .= '<li '. $float_params . $void_params .'>';
                $x .= '<a href="?'.$id.'" class="w2">'. $id .'</a> ';
-               $x .= '<span class="w4">'. $tt_from .' '.$t_float. ( $has_float ? '<sup class="bad smaller">('.$t_float.')</sup>' :'') .'</span>';
+               $x .= '<span class="w4">'. $tt_from .' '. ( $has_float ? '<sup class="bad smaller">('.$t_float.')</sup>' :'') .'</span>';
                $x .= '<span class="w4">'. $tt_to .'</span>';
                // $x .= '<span class="w3">'.date(mdY,strtotime($transfer_date)).'</span>';
                $x .= '<span class="w2 ct dashicons dashicons-'.($has_float ? 'warning' : ( $receive_by || $conso_by ? 'yes' : 'no' )).'"></span>';

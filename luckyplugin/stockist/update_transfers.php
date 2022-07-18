@@ -13,7 +13,7 @@ if( !empty($_POST) ) {
      $to   = $_POST['transfer_to'];
      $so   = $_POST['stock_out'];
      $sb   = $_POST['submit'];
-     $fn   = $_POST['final'];
+     $fnl  = $_POST['final'];
      $uri  = $_POST['uri'];
      $bak  = $_POST['bak'];
      $void = $_POST['void'];
@@ -47,8 +47,8 @@ if( !empty($_POST) ) {
      $flo = 'transfers_float' . SEL_YEAR;
      $stk = 'stocks';
 
-     if( isset($fn) ) {
-          // receive final
+     if( isset($fnl) ) {
+// receive final
           foreach ($_POST as $k=>$v) {
                $qry = "UPDATE $trn SET transfer_qty=transfer_qty-$v WHERE item=$k AND transfer_id=$uri";
                update(DBOPS,$qry);
@@ -66,10 +66,10 @@ if( !empty($_POST) ) {
           }
 
           $sb = 'Accept Receive Final';
-          // end receive final
+// end receive final
 
      } elseif( isset($void) ) {
-          // void
+// void
           $qry = "UPDATE transfers SET void_date='". date(TMDSET) ."',void_by='". $_SESSION['un'] ."' WHERE id=$uri";
           update(DBSTK,$qry);
 
@@ -87,14 +87,14 @@ if( !empty($_POST) ) {
           }
 
           $sb = 'Void';
-     // end void
+// end void
 
      } else {
 
           switch ( $sb ) {
 
                case 'Transfer':
-                    // trannsfer
+// trannsfer
                     if( allow_submit( test_transfers(SQLi(DBSTK), $test_stockist_id) ) ) {
                          if( $fm=='STOCK IN' || $to=='STOCK OUT' ) {
                               $qry = "INSERT INTO transfers (id,transfer_from,transfer_to,transfer_date,transfer_by,receive_date,receive_by) VALUES ('','". $fm ."','". $to ."','". date(TMDSET) ."','". $_SESSION['un'] ."','". date(TMDSET) ."','". $to ."')";
@@ -106,35 +106,32 @@ if( !empty($_POST) ) {
                          if( !empty($reorder) ) {
                               $qry = "UPDATE reorders SET transfer_id='". $last_id ."',status=2 WHERE id=" . $reorder['id'];
                               update(DBSTK,$qry);
-     // echo $qry;
+// echo $qry . '<br><br>';
                          }
 
                          foreach ($_POST as $k=>$v) {
                               if( $v > 0 ) {
                                    $kid = substr($k,-5);
 
-                                   if( !empty($reorder) ) {
-                                        $qry = "UPDATE $trn SET transfer_qty=$v,transfer_id='". $last_id ."' WHERE item='$k' AND reorder_id='" . $reorder['id'] ."'";
-
+                                   if( $fm=='STOCK IN' || $to=='STOCK OUT' ) {
+                                        $qry = "INSERT INTO $flo (id,item,float_qty,transfer_date,transfer_id) VALUES ('',$kid,0,'". date(TMDSET) ."',". $last_id .")";
                                    } else {
-                                        if( $fm=='STOCK IN' || $to=='STOCK OUT' ) {
-                                             $qry = "INSERT INTO $flo (id,item,float_qty,transfer_date,transfer_id) VALUES ('',$kid,0,'". date(TMDSET) ."',". $last_id .")";
-                                        } else {
-                                             $qry = "INSERT INTO $flo (id,item,float_qty,transfer_date,transfer_id) VALUES ('',$kid,$v,'". date(TMDSET) ."',". $last_id .")";
-                                        }
-                                        update(DBOPS,$qry);
-
-                                        if( $fm=='STOCK IN' || $to=='STOCK OUT' ) {
-                                             $qry = "INSERT INTO $trn (id,item,transfer_qty,receive_qty,transfer_id) VALUES ('',$kid,$v,$v,". $last_id .")";
-                                        } else {
-                                             $qry = "INSERT INTO $trn (id,item,transfer_qty,transfer_id) VALUES ('',$kid,$v,". $last_id .")";
-                                        }
+                                        $qry = "INSERT INTO $flo (id,item,float_qty,transfer_date,transfer_id) VALUES ('',$kid,$v,'". date(TMDSET) ."',". $last_id .")";
                                    }
+                                   update(DBOPS,$qry);
 
+                                   if (!empty($reorder)) {
+                                        $qry = "UPDATE $trn SET transfer_qty=$v,transfer_id='" . $last_id . "' WHERE item='$kid' AND reorder_id='" . $reorder['id'] . "'";
+                                   } elseif( $fm=='STOCK IN' || $to=='STOCK OUT' ) {
+                                        $qry = "INSERT INTO $trn (id,item,transfer_qty,receive_qty,transfer_id) VALUES ('',$kid,$v,$v,". $last_id .")";
+                                   } else {
+                                        $qry = "INSERT INTO $trn (id,item,transfer_qty,transfer_id) VALUES ('',$kid,$v,". $last_id .")";
+                                   }
+// echo $qry . '<br>';
                                    update(DBOPS,$qry);
 
                                    if( strpos($fm,'STOCK') === false ) {
-                                        $qry = "UPDATE ".DB.DBSTK.".stocks SET qty=qty-$v WHERE id=".$fm.$kid;
+                                        $qry = "UPDATE " . DB . DBSTK . ".stocks SET qty=qty-$v WHERE id=" . $fm . $kid;
                                         update(DBSTK,$qry);
                                    }
                               }
@@ -149,9 +146,10 @@ if( !empty($_POST) ) {
                     }
 
                     break;
-               // end transfer
+// end transfer
 
                case 'Receive':
+// receive
                     foreach ($_POST as $k=>$v) {
                          $qry = "UPDATE $trn SET receive_qty=$v WHERE item=$k AND transfer_id=$uri";
                          update(DBOPS,$qry);
@@ -168,26 +166,27 @@ if( !empty($_POST) ) {
 
                     init_logs(1,'transfers',$last_id, ISIN_ADMIN ? ADMIN_ID : STOCKIST_ID );
                     break;
-               // end receive
+// end receive
 
                case 'Consolidate':
+// consolidate
                     foreach ($_POST as $k=>$v) {
                          $qry = "UPDATE $trn SET consolidate=consolidate+". ((int)$v) ." WHERE item=$k AND transfer_id=$uri";
-                         update(DBOPS,$qry);
+                         update(DBOPS, $qry);
 
                          $qry = "UPDATE $flo SET float_qty=float_qty-". ((int)$v) .",conso_date='". date(TMDSET) ."' WHERE item=$k AND transfer_id=$uri";
-                         update(DBOPS,$qry);
+                         update(DBOPS, $qry);
                     }
 
                     $qry = "UPDATE transfers SET conso_date='". date(TMDSET) ."',conso_by='". $_SESSION['un'] ."' WHERE id=$uri";
-                    update(DBSTK,$qry);
+                    update(DBSTK, $qry);
 
                     update_stocks($_POST, $to, '+');
                     $last_id = $uri;
 
                     init_logs(1,'transfers',$last_id, ISIN_ADMIN ? ADMIN_ID : STOCKIST_ID );
                     break;
-               // end consolidate
+// end consolidate
 
           }
      }

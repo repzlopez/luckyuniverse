@@ -1,12 +1,12 @@
 <?php if( !preg_match( "/admin|stockist/i", $_SESSION['user_type'] ) ) exit;
 if( !isset($_SESSION) ) session_start();
 
-$reorder = ( isset($_SESSION['reorders']) ? $_SESSION['reorders'] :array() );
-$is_reorder = !empty($reorder);
+$reorders = ( isset($_SESSION['reorders']) ? $_SESSION['reorders'] :array() );
+$is_reorder = !empty($reorders);
 $transfer_out_to = null;
 
 $ret = get_page_by_title( $post->post_title, '', 'page' );
-$ror = get_page_by_title( (ISIN_ADMIN ? 'Manage ' : '') . 'Reorders', '', 'page' );
+$ror = get_page_by_title( (ISIN_ADMIN ? 'Manage Reorders' :'') . 'Reorder', '', 'page' );
 $bak = $is_reorder ? $ror->ID : $ret->ID;
 
 $trn = 'transfers' . SEL_YEAR;
@@ -33,7 +33,7 @@ $not_found = '';
 if( $uri != 'add' ) {
      $con = SQLi(DBOPS);
 
-     $qry = "SELECT t.transfer_qty qty,t.receive_qty r_qty,t.consolidate c_qty,f.float_qty f_qty,s.*,p.id pid,p.name,
+     $qry = "SELECT t.transfer_qty qty,t.reorder_qty r_qty,t.receive_qty d_qty,t.consolidate c_qty,f.float_qty f_qty,s.*,p.id pid,p.name,
           (SELECT warehouse FROM ".DB.DBPRF.".stockist WHERE id=transfer_from) t_fr,
           (SELECT warehouse FROM ".DB.DBPRF.".stockist WHERE id=transfer_to) t_to,
           (SELECT warehouse FROM ".DB.DBPRF.".stockist WHERE id=transfer_by) t_by,
@@ -55,7 +55,7 @@ if( $uri != 'add' ) {
      if( $stockist_id=='' || strpos($stockist_id,'STOCK') !== false ) {
           $add = '';
 
-          foreach ($reorder as $k=>$v) {
+          foreach ($reorders as $k=>$v) {
                if( $k!='id' && $k!='wh' ) {
                     $add .= "p.id=$k OR ";
                }
@@ -106,20 +106,38 @@ if( mysqli_num_rows($rs)>0 ) {
           $has_float += $f_qty;
           $total_conso += $c_qty;
 
+          $add_float = ($f_qty > 0 || $has_reorder) ? '<span class="w2 ct">' . (ISIN_ADMIN ?
+               '<input type="number" name="' . $pid . '" class="f_qty btn w2 ct" min="0" max="' . $f_qty . '" value="' . $f_qty . '" placeholder="0" />' :
+               '<strong class="bad" title="Contact Admin to consolidate">' . $f_qty . '</strong>') . '</span> '
+               :'' ;
+
+          $has_reorder = ($r_qty >= $d_qty && $r_qty >= $f_qty);
+
           if( ($stockist_id!='' && $stockist_id<1) || $qty>0 || $is_reorder ) {
                $y .= '<li>';
-                    $y .= '<span class="'.$col1.'">'.$pid.' '.$name.'</span> ';
+               if ($is_reorder) {
+                    if (array_key_exists($pid, $reorders)) $y .= '<span class="'.$col1.'">'.$pid.' '.$name.'</span> ';
+
+               } else $y .= '<span class="'.$col1.'">'.$pid.' '.$name.'</span> ';
 
                     if( $exists ) {
-                         $y .= '<span class="w2 ct">'.$qty.'</span> ';
-                         $y .= ( ISIN_STOCKIST && !$stock_in && !$stock_out ) ? '<input type="hidden" name="'.$pid.'" value="'.( $received_date ? $r_qty : $qty ).'" />' :'';
+                         if( $has_reorder ) {
+                              $y .= '<span class="w2 ct">' . $r_qty . '</span> ';
+                         }
+
+                         $y .= '<span class="w2 ct">' . $qty . '</span> ';
+                         $y .= ( ISIN_STOCKIST && !$stock_in && !$stock_out ) ? '<input type="hidden" name="'.$pid.'" value="'.( $received_date ? $d_qty : $qty ).'" />' :'';
 
                          if( $receive_by=='' && $transfer_to==$stockist_id ) {
-                              $y .= '<span class="w2 ct"><input type="number" name="'.$pid.'" class="r_qty btn w2 ct" min="0" max="'.$qty.'" value="'.( $received_date ? $r_qty : $qty ).'" placeholder="0" /></span> ';
+                              $y .= '<span class="w2 ct"><input type="number" name="'.$pid.'" class="r_qty btn w2 ct" min="0" max="'.$qty.'" value="'.( $received_date ? $d_qty : $qty ).'" placeholder="0" /></span> ';
+
+                              $y .= $add_float;
 
                          } else {
-                              if( !$stock_in && !$stock_out ) $y .= '<span class="w2 ct">'. ($r_qty + $c_qty) .'</span> ';
-                              if( $f_qty>0 ) $y .= '<span class="w2 ct">'. ( ISIN_ADMIN ? '<input type="number" name="'.$pid.'" class="f_qty btn w2 ct" min="0" max="'. $f_qty .'" value="'. $f_qty .'" placeholder="0" />' : '<strong class="bad" title="Contact Admin to consolidate">'. $f_qty .'</strong>' ) .'</span> ';
+                              if( !$stock_in && !$stock_out ) $y .= '<span class="w2 ct">'. ($d_qty + $c_qty) .'</span> ';
+
+                              $y .= $add_float;
+
                               $y .= '<input type="hidden" name="transfer_from" value="'.$transfer_from.'" />';
                               $y .= '<input type="hidden" name="transfer_to" value="'.$transfer_to.'" />';
                          }
@@ -128,24 +146,34 @@ if( mysqli_num_rows($rs)>0 ) {
                          $max = 'max="'.$qty.'"';
 
                          if( $is_reorder ) {
-                              $new_qty  = $reorder[$id];
-                              $new_dp   = $new_qty * $wsp;
-                              $new_tdp += $new_dp;
+                              if( array_key_exists($pid, $reorders) ) {
+                                   $new_qty  = $reorders[$pid];
+                                   $new_dp   = $new_qty * $wsp;
+                                   $new_tdp += $new_dp;
+
+                                   $open_qty = array_key_exists($pid, $reorders) ? '' : DISABLED;
+
+                                   $y .= '<span class="' . $col2 . '">' . $qty . '</span> ';
+                                   $y .= '<span class="w2 ct"><input type="number" name="' . $id . '" class="qty btn w2 ct" data-dp="' . $wsp . '" min="0" ' . $max . ' value="' . $new_qty . '" placeholder="0" ' . $open_qty . ' /></span> ';
+                                   $y .= '<span class="' . $col4 . ' amt_dp">' . number_format($new_dp, 2) . '</span> ';
+                              }
+
+                         } else {
+                              $y .= '<span class="' . $col2 . '">' . $qty . '</span> ';
+                              $y .= '<span class="w2 ct"><input type="number" name="' . $id . '" class="qty btn w2 ct" data-dp="' . $wsp . '" min="0" ' . $max . ' value="' . $new_qty . '" placeholder="0" /></span> ';
+                              $y .= '<span class="' . $col4 . ' amt_dp">' . number_format($new_dp, 2) . '</span> ';
                          }
 
-                         $y .= '<span class="'.$col2.'">'.$qty.'</span> ';
-                         $y .= '<span class="w2 ct"><input type="number" name="'.$id.'" class="qty btn w2 ct" data-dp="'.$wsp.'" min="0" '.$max.' value="'.$new_qty.'" placeholder="0" /></span> ';
-                         $y .= '<span class="'.$col4.' amt_dp">'. number_format($new_dp,2) .'</span> ';
                     }
 
                $y .= '</li>';
 
-               $total_items++;
+               if ($is_reorder) {
+                    if (array_key_exists($pid, $reorders)) $total_items++;
+
+               } else $total_items++;
           }
 
-          if( $is_reorder ) {
-
-          }
      }
 
 } else $x .= $not_found;
@@ -190,9 +218,9 @@ if( $exists ) {
 }
 
 if( $is_reorder ) {
-     $lock= $stockist_id= 1;
-     $transfer_out_to = $reorder['wh'];
-     $x .= '<h5>Reorder # '. $reorder['id'] .'</h5>';
+     $lock= 1;
+     $transfer_out_to = $reorders['wh'];
+     $x .= '<h5>Reorder # '. $reorders['id'] .'</h5>';
 }
 
 $transfer_from_dropdown = $is_reorder ? '<option value="'. HEAD_OFFICE .'" '. SELECTED .'>Head Office</option>' : load_stockist_list($stockist_id, $add, 'from', $lock);
@@ -203,6 +231,10 @@ $x .= '<li><strong class="'.$col1.'">Product Name</strong> ';
 
 if( !$exists ) {
      $x .= '<span class="'.$col2.'">'. ($stock_in ? '': 'On Hand') .'</span> ';
+}
+
+if( $exists && $has_reorder ) {
+     $x .= '<strong class="w2 ct">Reordered</strong> ';
 }
 
 $x .= '<strong class="w2 ct">'.( $exists ? ($stock_in ? 'Stock In' : ($stock_out ? 'Stock Out' : 'Transfer' )) : 'Qty' ).'</strong> ';
@@ -232,9 +264,12 @@ $transfer_to_dropdown = ( $stockist_id=='STOCK IN' ) ? '<option value="'. HEAD_O
 $x .= '<hr><div id="bottom_nav">';
 
 if( $uri == 'add' ) {
-     $x .= '<input type="hidden" id="transfer_from" name="transfer_from" value="'.$stockist_id.'" />';
+     $x .= '<input type="hidden" id="transfer_from" name="transfer_from" value="'. ($stockist_id == 'STOCK IN' ? $stockist_id : sprintf("%'.0" . PAD . "d", $stockist_id) ) .'" />';
      $x .= '<span class="w0"></span>';
-     $x .= '<span>TRANSFER TO <select name="transfer_to" id="transfer_to" required>'. $transfer_to_dropdown .'</select></span><hr>';
+
+     $open_qty = $is_reorder ? READ_ONLY :'';
+
+     $x .= '<span>TRANSFER TO <select name="transfer_to" id="transfer_to" required '. $open_qty .'>'. $transfer_to_dropdown .'</select></span><hr>';
      $x .= '<input type="submit" name="submit" class="btn" value="Transfer" /> ';
 }
 
@@ -249,7 +284,7 @@ if( $exists && ISIN_ADMIN && $has_float) {
 
 $x .= '<input type="hidden" name="bak" value="'.$bak.'" /> ';
 
-if( $exists && !$receive_by && !$void_by && !$stock_in && !$stock_out ) {
+if(  $exists && !$transfer_by && !$receive_by && !$void_by && !$stock_in && !$stock_out ) {
      if( ISIN_ADMIN ) $x .= '<input type="submit" name="edit" class="btn" value="Edit" /> ';
      if( ISIN_STOCKIST ) $x .= '<input type="submit" name="void" class="btn" value="Void" /> ';
 }

@@ -22,10 +22,19 @@ dhubcares@gmail.com
 
 luckynotif@luckyuniverseph.com
 
-ADD printed checkbox to PROFILE
+
 
 =====================================
+TO DO
+=====================================
 
-REORDER
-- test available stocks
-- notify user
+PROFILE
+ADD printed checkbox to PROFILE
+
+ASSEMBLE PACKAGE
+- check package if added
+- check stock, deducted
+
+
+TRANSFERS
+- editing, if !status
