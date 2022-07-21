@@ -22,7 +22,7 @@ if( !empty( $_POST ) ) {
           insert_duplicate($con,$tbl,$kdata,$idata,$udata);
      }
 
-     $ret = get_page_by_title( 'Manage Orders'), '', 'page' );
+     $ret = get_page_by_title( 'Manage Orders', '', 'page' );
      wp_redirect( get_permalink($ret->ID) . $slug );
      exit;
 }

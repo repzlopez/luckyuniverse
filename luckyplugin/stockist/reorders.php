@@ -7,10 +7,12 @@ $ret = get_page_by_title( $post->post_title, '', 'page' );
 $mtr = get_page_by_title( (ISIN_ADMIN ? 'Manage ' : '') . 'Transfers', '', 'page' );
 $fee = get_page_by_title( 'Fees', '', 'page' );
 
+$edit = 0;
+
 if( isset($_POST) && !empty($_POST) ) {
      defined('INCLUDE_CHECK') || define('INCLUDE_CHECK',1);
      require_once plugin_dir_path( __DIR__ ) . 'templates/setup.php';
-// print_r($_POST);
+
      foreach ($_POST as $k=>$v) $$k = str_replace(',', '', $v);
 
      if( ISIN_ADMIN || STOCKIST_ID == $reorder_from ) {
@@ -29,7 +31,13 @@ if( isset($_POST) && !empty($_POST) ) {
           $url = get_permalink( $mtr->ID ) .'?add';
 
      } else {
-          if( $void ) {
+
+          if ($edit) {
+               $_SESSION['cart'] = $_SESSION['edit_reorders'];
+               echo '<h5>Editing Reorder # ' . sprintf("%'.0" . PAD . "d\n", $uri) . '</h5>';
+
+
+          } elseif ($void) {
                $con = SQLi(DBSTK);
                $qry = "UPDATE reorders SET void_date='" . date(TMDSET) . "',void_by='" . STOCKIST_ID . "',status=3 WHERE id=$uri";
                $rs  = $con->query($qry);
@@ -37,9 +45,11 @@ if( isset($_POST) && !empty($_POST) ) {
                echo '<h5>Reorder ' . sprintf("%'.0" . PAD . "d\n", $uri) . ' voided</h5>';
 
           } else {
-               $con = SQLi(DBSTK);
-               $qry = "INSERT INTO reorders (id,pay_amount,s_fee,s_pct,warehouse,reorder_from,submitted,status) VALUES ('',$pay_amount,$s_fee,$s_pct,'". STOCKIST_ID ."','$reorder_from','". date(TMDSET) ."',$status)";
+               $dis_id = isset($_SESSION['reorders']) ? $_SESSION['reorders']['id'] :'';
+               $qry = "INSERT INTO reorders (id,pay_amount,s_fee,s_pct,warehouse,reorder_from,submitted,status) VALUES ($dis_id,$pay_amount,$s_fee,$s_pct,'". STOCKIST_ID ."','$reorder_from','". date(TMDSET) ."',$status) ON DUPLICATE KEY UPDATE pay_amount=$pay_amount,s_fee=$s_fee,submitted='" . date(TMDSET) . "'";
+// echo '<br>' . $qry . '<br>';
 
+               $con = SQLi(DBSTK);
                $con->query($qry) or die(mysqli_error($con));
                $last_id = mysqli_insert_id( $con );
 
@@ -50,7 +60,13 @@ if( isset($_POST) && !empty($_POST) ) {
                     $qty  = $z['qty'];
 
                     if( $qty >0 ) {
-                         $qry = "INSERT INTO $tbl (id,item,reorder_qty,reorder_id) VALUES ('',$item,$qty,". $last_id .")";
+                         if( $dis_id=='' ) {
+                              $qry = "INSERT INTO $tbl (id,item,reorder_qty,reorder_id) VALUES ('',$item,$qty,$last_id)";
+                         } else {
+                              $last_id = $dis_id;
+                              $qry = "UPDATE $tbl SET reorder_qty=$qty WHERE reorder_id=" . $dis_id . " AND item=$item";
+                         }
+// echo '<br>' . $qry . '<br>';
                          $con->query($qry) or die(mysqli_error($con));
                     }
                }
@@ -61,30 +77,34 @@ if( isset($_POST) && !empty($_POST) ) {
      }
 // echo $qry;
 
-     mysqli_close($con);
-     unset($_POST);
+     if( !$edit ) {
+          mysqli_close($con);
+          unset($_POST);
 
-     reloadTo( $url );
-     exit;
+          reloadTo($url);
+          exit;
+     }
 }
+$_SESSION['edit_reorders'] = array();
+// echo "==$edit==<br>";
 
 $x= $o_l= $i_l= '';
 $pay_amount= $reorder_due= $pov= $under_stock= 0;
 $stock = 99999;
 
-$exists = ( $uri != '' && $uri != 'add' );
+$exists = ( ( $uri !='' && $uri !='add' ) || $edit );
 
 if( $exists ) {
      $con = SQLi(DBSTK);
      $trn = 'transfers' . SEL_YEAR;
      $tbl = 'reorders';
 
-     $qry = "SELECT t.id,t.item,t.reorder_qty,t.transfer_id,r.*,p.name,
+     $qry = "SELECT t.id,t.item,t.reorder_qty,t.transfer_id,r.*,p.name,p.wsp,p.srp,p.pov,
                s.upline,s.level,s.warehouse stockist_name,ss.qty ss_qty,
                (SELECT warehouse FROM " . DB . DBPRF . ".stockist WHERE id=r.reorder_from) from_name
           FROM reorders r
-          LEFT JOIN ".DB.DBOPS.".$trn t ON t.reorder_id=r.id
-          LEFT JOIN (SELECT id,name FROM ".DB.DBPRF. ".products) p ON p.id=t.item
+          LEFT JOIN " . DB . DBOPS . ".$trn t ON t.reorder_id=r.id
+          LEFT JOIN " . DB . DBPRF . ".products p ON p.id=t.item
           LEFT JOIN (SELECT id,upline,level,warehouse FROM " . DB . DBPRF . ".stockist) s ON s.id=r.warehouse
           LEFT JOIN (SELECT id,qty FROM " . DB . DBSTK . ".stocks) ss ON ss.id=CONCAT(r.reorder_from,t.item)
           WHERE r.id='$uri' ";
@@ -92,7 +112,6 @@ if( $exists ) {
 } else {
      $con  = SQLi(DBPRF);
      $tbl  = 'products';
-     $qry  = "SELECT * FROM $tbl WHERE status=1 ORDER BY sort_order,name";
      $qry = "SELECT p.id pid,p.*
           FROM $tbl p
           WHERE p.status=1
@@ -109,7 +128,7 @@ if( $rs->num_rows>0 ) {
                foreach ($r as $k=>$v) $$k=$v;
 
                $ss_class = $ss_qty > $reorder_qty ? 'good' : 'bad';
-               $stock_qty = (!$status && $reorder_from==STOCKIST_ID ? '<span class="'. $ss_class .' rt w2">'. (int)$ss_qty .'</span>' :'');
+               $stock_qty = (!$status && $reorder_from==STOCKIST_ID ? ''. (int)$ss_qty .'' :'');
 
                $under_stock += ($reorder_qty >= $ss_qty);
 
@@ -117,8 +136,16 @@ if( $rs->num_rows>0 ) {
                     <span class="">' . $item . '</span>
                     <span>' . $name . '</span>
                     <span class="rt">' . $reorder_qty . '</span>
-                    '. $stock_qty .'
+                    <span class="' . $ss_class . ' rt w2">'. $stock_qty . '</span>
                </li>';
+
+               $_SESSION['edit_reorders'][$item]['id']    = $item;
+               $_SESSION['edit_reorders'][$item]['qty']   = $reorder_qty;
+               $_SESSION['edit_reorders'][$item]['pov']   = $pov;
+               $_SESSION['edit_reorders'][$item]['price'] = $wsp;
+               $_SESSION['edit_reorders'][$item]['less']  = 0;
+               $_SESSION['edit_reorders'][$item]['name']  = $name;
+               $_SESSION['edit_reorders'][$item]['stock'] = $stock_qty;
 
                $_SESSION['reorders'][$item] = $reorder_qty;
                $_SESSION['reorders']['id'] = $id;
@@ -131,19 +158,21 @@ if( $rs->num_rows>0 ) {
                $chk  = array_key_exists($r['pid'],$_SESSION['cart']) ? CHECKED :'';
 
                $add_info = 'data-name="' . $r['name'] . '" data-price="' . $r['wsp'] . '" data-pov="' . $r['pov'] . '" data-stock="' . $stock . '" ' . $chk ;
-               $i_l .= '<li><label for="'.$r['pid'].'" title="'.$r['name'].'">';
-               $i_l .= '<input type="checkbox" id="'.$r['pid'].'" '. $add_info .' />';
-               $i_l .= $r['pid'].' '.$r['name'].'</label></li>';
           }
 
+          $i_l .= '<li><label for="' . $r['pid'] . '" title="' . $r['name'] . '">';
+          $i_l .= '<input type="checkbox" id="' . $r['pid'] . '" ' . $add_info . ' />';
+          $i_l .= $r['pid'] . ' ' . $r['name'] . '</label></li>';
      }
 }
-
+// print_r($_SESSION['cart']);
 if( !empty($_SESSION['cart']) ) {
+     if( $edit ) $o_l = '';
+
      foreach ($_SESSION['cart'] as $k=>$v) {
-          $amt = $v['qty']*$v['price'];
-          $pov += $v['qty']*$v['pov'];
-          $pay_amount += $amt;
+          $amt = $v['qty'] * $v['price'];
+          $pov += $v['qty'] * $v['pov'];
+          if(!$edit) $pay_amount += $amt;
 
           $o_l .= '<li class="'.$v['id'].'">
                <span class="bb"><input type="number" class="item_code" placeholder="00000" max="99999" minlength=5 maxlength=5 value="'.$v['id'].'" /></span>
@@ -154,23 +183,24 @@ if( !empty($_SESSION['cart']) ) {
      }
 }
 
-$submitted = ( $submitted!='' ? $submitted : date(TMDSET) );
-$submit    = !$exists ? '<input type="submit" class="w2 btn" value="Submit" /> ' : '';
-$void      = $exists && !$status && $warehouse == STOCKIST_ID ? '<input type="hidden" name="void" value=1 /><input type="submit" class="w2 btn" name="toto" value="Void" /> ' : '';
-$aprub     = (( ISIN_ADMIN || $reorder_from == STOCKIST_ID ) && !$under_stock) ? '<input type="submit" class="btn" value="'.( $status ? 'Transfer' : 'Approve' ).'" /> ' :''; //&& !$status
-$gotrans   = '<input type="button" href="'.get_permalink( $mtr->ID ).'?'.$transfer_id.'" class="btn link" value="Go to Transfers" /> ';
-$back      = !$_SESSION['fees_on'] ? '<input type="button" href="'.get_permalink( $ret->ID ).'" class="w2 btn link" value="Back" /> ' :'';
-$baktofees = $_SESSION['fees_on'] ? '<input type="button" href="'.get_permalink( $fee->ID ).'" class="w2 btn link" value="Back to Fees" /> ' :'';
+$submitted = ( $submitted != '' ? $submitted : date(TMDSET));
+$submit    = '<input type="submit" class="w2 btn" value="Submit" /> ';
+$editbtn   = $exists && !$status && $warehouse == STOCKIST_ID ? '<input type="hidden" name="edit" value=1 /><input type="submit" class="w2 btn" value="Edit" /> ' : '';
+$void      = $exists && !$status && $warehouse == STOCKIST_ID ? '<input type="hidden" name="void" value=1 /><input type="submit" class="w2 btn" value="Void" /> ' : '';
+$aprub     = ( (ISIN_ADMIN || $reorder_from == STOCKIST_ID) && !$under_stock) ? '<input type="submit" class="btn" value="' . ($status ? 'Transfer' : 'Approve') . '" /> ' : ''; //&& !$status
+$gotrans   = '<input type="button" href="' . get_permalink($mtr->ID) . '?' . $transfer_id . '" class="btn link" value="Go to Transfers" /> ';
+$back      = !$_SESSION['fees_on'] ? '<input type="button" href="' . get_permalink($ret->ID) . '" class="w2 btn link" value="'. ( $uri=='add' || $edit ? 'Cancel' : 'Back').'" /> ' : '';
+$baktofees = $_SESSION['fees_on'] ? '<input type="button" href="' . get_permalink($fee->ID) . '" class="w2 btn link" value="Back to Fees" /> ' : '';
 
-$insufficient_stocks = (!$status && $reorder_from == STOCKIST_ID && $under_stock ? '<span class="bad smaller">Insufficient stocks</span>' :'');
+$insufficient_stocks = (!$status && $reorder_from == STOCKIST_ID && $under_stock ? '<span class="bad smaller">Insufficient stocks</span>' : '');
 
 unset($_SESSION['fees_on']);
 
 $co  = '<hr><li><form method="post" class="cart"><h3>Transaction Details</h3><ul>';
-$co .= '<input type="hidden" name="id" value="'.($uri!=''?sprintf("%'.0".PAD."d\n", $uri):'').'" />';
-$co .= ISIN_ADMIN ? '<input type="hidden" name="warehouse" value="'.$warehouse.'" />' :'';
-$co .= ISIN_ADMIN ? '<input type="hidden" name="upline" value="'.$upline.'" />' :'';
-$co .= ISIN_ADMIN ? '<input type="hidden" name="level" value="'.$level.'" />' :'';
+$co .= '<input type="hidden" name="id" value="' . ($uri != '' ? sprintf("%'.0" . PAD . "d\n", $uri) : '') . '" />';
+$co .= ISIN_ADMIN ? '<input type="hidden" name="warehouse" value="' . $warehouse . '" />' : '';
+$co .= ISIN_ADMIN ? '<input type="hidden" name="upline" value="' . $upline . '" />' : '';
+$co .= ISIN_ADMIN ? '<input type="hidden" name="level" value="' . $level . '" />' : '';
 
 $select_reorder_from = ( $exists ?
           '<strong class="w4"> ' . $from_name . '</strong><input type="hidden" name="reorder_from" class="reorder_from" value="' . $reorder_from . '" />' :
@@ -197,8 +227,8 @@ $co .= '</li>';
 $co .= '<li '. ($status==3 ? 'class="void"' :'') .'><label class="w4">Status:</label> <span class="w4">'.strtoupper($arrReorders[$status]).'</span> <input type="hidden" value='.$status.' name="status" />';
 $co .= '    <label>Amount Due:</label> <input type="text" class="w4 rt" id="reorder_due" value="'. number_format($reorder_due,2) .'" '.READ_ONLY.' />';
 $co .= '</li>';
-
-$co .= '</ul><hr><div>'. ( $exists ? ( $transfer_id!='' ? $gotrans :$aprub ) : $submit ). $back . $void . $insufficient_stocks . $baktofees .'<span class="smaller"></span></div>';
+// echo "$exists ? $edit";
+$co .= '</ul><hr><div>'. ( $exists ? ($edit ? $submit : ( $transfer_id!='' ? $gotrans :$aprub )) : $submit) . ( !$edit ? $editbtn :'' ) . $back . ( $exists && !$edit ? $void : '' ) . $insufficient_stocks . $baktofees .'<span class="smaller"></span></div>';
 $co .= '</form></li>';
 
 $empty_row = $exists ? '' : '<li>
@@ -208,7 +238,7 @@ $empty_row = $exists ? '' : '<li>
      <span>0.00</span>
 </li>';
 
-$stock_qty_hdr = ( !$status && $reorder_from == STOCKIST_ID ? '<span class="rt w2">Stock</span>' : '');
+$stock_qty_hdr = ( !$status && $reorder_from == STOCKIST_ID ? 'Stock' : '');
 
 echo '<div id="stockist_orders" class="reorders">
           <h3>Orders</h3>
@@ -218,7 +248,7 @@ echo '<div id="stockist_orders" class="reorders">
                          <span>Code</span>
                          <span>Item</span>
                          <span class="rt">Qty</span>
-                         '. $stock_qty_hdr .'
+                         <span class="rt w2">'. $stock_qty_hdr . '</span>
                     </li>
                     '.$o_l.'
                     '.$empty_row.'
@@ -227,5 +257,5 @@ echo '<div id="stockist_orders" class="reorders">
                     <ul>'. $co .'</ul>
                </li>
           </ul>
-     </div>' . ( !$exists ? (load_item_list($i_l,0)) :'') . BACKTOTOP;
+     </div>' . ( !$exists || $edit ? (load_item_list($i_l,0)) :'') . BACKTOTOP;
 ?>
